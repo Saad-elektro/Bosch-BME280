@@ -1,4 +1,4 @@
-/** Put this in the src folder **/
+
 
 #include "BME280.h"
 #include <string.h>
@@ -13,17 +13,17 @@ extern I2C_HandleTypeDef hi2c1;  // change your handler here accordingly
 
 void USART2_Init(void){
 	
-	RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
   RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
-	GPIOA->CRH &=~ GPIO_CRH_CNF9_0;
+  GPIOA->CRH &=~ GPIO_CRH_CNF9_0;
   GPIOA->CRH |= GPIO_CRH_CNF9_1;
   GPIOA->CRH |= (GPIO_CRH_MODE9_1 | GPIO_CRH_MODE9_0);
 	
-USART1->BRR = 0XEA6;
+  USART1->BRR = 0XEA6;
 
-USART1->CR1 |= USART_CR1_UE;
-USART1->CR1 |= USART_CR1_TE;
-USART1->CR1 |= USART_CR1_RE ;
+  USART1->CR1 |= USART_CR1_UE;
+  USART1->CR1 |= USART_CR1_TE;
+  USART1->CR1 |= USART_CR1_RE ;
 
 }
 
@@ -31,8 +31,8 @@ void USART_write( int ch){
 
 	while(!(USART2->SR & USART_SR_TXE)){}  // we check if the transmit buffer is empty before sending the data
 		
-		USART2->DR = (ch);    // contains the received or transmitted data 
-		                            //we put the data which we will send in DR register of the microcontroller
+	USART2->DR = (ch);    // contains the received or transmitted data 
+		              //we put the data which we will send in DR register of the microcontroller
 	}
 
 	
@@ -119,22 +119,20 @@ HAL_Delay(2000);
 }
 //------- Global Variables------------
 
-//uint8_t reg_data[6];
+
 uint8_t reg_data[8];  // Pressure (20bits - Temperature(bits) - Humidity(16bits); 
 uint8_t Press_regADDR = 0xF7;
 
 int32_t t_fine;	// t_fine carries a fine resolution temperature value over pressure and humidity compensation formula
 int8_t dig_H1;
-// Reading measurements temperature raw_values	
 	
-
 	
 int32_t Press_adc_values(){
 		
 	int32_t raw_press_values;
 
 		
-		HAL_I2C_Master_Transmit(&hi2c1, (0x76<<1), &Press_regADDR, 1,50);	// 0xF7 start adress Press (MSB) register
+    HAL_I2C_Master_Transmit(&hi2c1, (0x76<<1), &Press_regADDR, 1,50);	// 0xF7 start adress Press (MSB) register
 		
     HAL_Delay(100);
 
@@ -142,18 +140,18 @@ int32_t Press_adc_values(){
 
     HAL_Delay(100);	
 		
-		raw_press_values = reg_data[0];
+    raw_press_values = reg_data[0];
     raw_press_values = (raw_press_values<<8) | reg_data[1];
     raw_press_values = (raw_press_values<<4) | reg_data[2];
 	
 		
-		return raw_press_values;
+     return raw_press_values;
 	}
 
 int32_t Temp_adc_values(){
 	
 
-	int32_t raw_temp_values;
+int32_t raw_temp_values;
 
 HAL_Delay(100);	
 
@@ -162,22 +160,16 @@ HAL_Delay(100);
  raw_temp_values = (raw_temp_values<<4) | reg_data[5];
 	
  
-		return raw_temp_values;
+	return raw_temp_values;
 	
 	}
 
 int32_t Hum_adc_values(){
 
 int32_t raw_hum_values;
-	
-//uint8_t data_msb, data_lsb;
-//data_msb = (int32_t)reg_data[6] <<8;
-//data_lsb = (int32_t)reg_data[7];
-	
-//	raw_hum_values= data_msb|data_lsb;
-	
+		
 raw_hum_values = (int32_t)(reg_data[6]<<8 | reg_data[7]);
-//raw_hum_values = (raw_hum_values<<8) | reg_data[7];
+
  
 return raw_hum_values;
 
@@ -185,27 +177,23 @@ return raw_hum_values;
 }	
 	
 
-	
-	
-//int32_t BME280_compensate_T_int32(uint32_t temp_value){
  float BME280_compensate_T_int32(uint32_t temp_value){
 	
 	//int32_t t_fine; --> Declared as global variable
   int32_t var1, var2;
 	float T;
-	//int32_t T;
 	uint8_t calib_data[6];
 	uint16_t dig_T1, dig_T2, dig_T3;
 	 
 	
-	uint8_t  calib00_ADDR = 0x88;
+  uint8_t  calib00_ADDR = 0x88;
   uint8_t  calib01_ADDR = 0x89;
   uint8_t  calib02_ADDR = 0x8A;
   uint8_t  calib03_ADDR = 0x8B;
   uint8_t  calib04_ADDR = 0x8C;
   uint8_t  calib05_ADDR = 0x8D;
 		
-// Read calibration data	
+// Read Temperature calibration data	
 	
 	HAL_I2C_Master_Transmit(&hi2c1, (0x76<<1), &calib00_ADDR, 1, 50);
 	HAL_Delay(50);
@@ -218,10 +206,7 @@ return raw_hum_values;
 	
 	HAL_Delay(200);
 
-// -------------------  Bosch API  ---------------------------------
-
-
-	  var1 = (int32_t)((temp_value / 8) - ((int32_t)dig_T1 * 2));
+    var1 = (int32_t)((temp_value / 8) - ((int32_t)dig_T1 * 2));
     var1 = (var1 * ((int32_t)dig_T2)) / 2048;
     var2 = (int32_t)((temp_value / 16) - ((int32_t)dig_T1));
     var2 = (((var2 * var2) / 4096) * ((int32_t)dig_T3)) / 16384;
@@ -234,10 +219,6 @@ return raw_hum_values;
  
 }	
 
-//----------------  Bosch API L1265 --------------------------------
-
-
-//------------------ Pressure compensation Calculation : Bosch API L-1350 -------------------------------
 
 uint32_t BME280_compensate_P_int32(int32_t Press_value){
 	
@@ -251,16 +232,16 @@ uint32_t BME280_compensate_P_int32(int32_t Press_value){
     uint32_t pressure_min = 30000;
     uint32_t pressure_max = 110000;
 
-	uint8_t calib_p_data[19];
-	uint16_t dig_P1, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
+uint8_t calib_p_data[19];
+uint16_t dig_P1, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
 	 
 	
-	uint8_t  calib06_ADDR = 0x8E;
-  uint8_t  calib07_ADDR = 0x8F;
-  uint8_t  calib08_ADDR = 0x90;
-  uint8_t  calib09_ADDR = 0x91;
-  uint8_t  calib10_ADDR = 0x92;
-  uint8_t  calib11_ADDR = 0x93;
+        uint8_t  calib06_ADDR = 0x8E;
+        uint8_t  calib07_ADDR = 0x8F;
+        uint8_t  calib08_ADDR = 0x90;
+        uint8_t  calib09_ADDR = 0x91;
+        uint8_t  calib10_ADDR = 0x92;
+        uint8_t  calib11_ADDR = 0x93;
 	uint8_t  calib12_ADDR = 0x94;
 	uint8_t  calib13_ADDR = 0x95;
 	uint8_t  calib14_ADDR = 0x96;
@@ -275,7 +256,7 @@ uint32_t BME280_compensate_P_int32(int32_t Press_value){
 	uint8_t  calib23_ADDR = 0x9F;
 	uint8_t  calib25_ADDR = 0xA1;  // P27/55 datasheet, we should read dig_H1 with the Pressure register (from 0x88 to 0xA1)
 	
-	//uint8_t  calib25_ADDR = 0xA1;
+	
 
 // Read calibration data	
 	
@@ -298,54 +279,7 @@ uint32_t BME280_compensate_P_int32(int32_t Press_value){
 	
 	HAL_Delay(200);
 
-// Bosch API L-1350
-/*
-    var1 = (((int32_t)t_fine) / 2) - (int32_t)64000;
-    var2 = (((var1 / 4) * (var1 / 4)) / 2048) * ((int32_t)dig_P6);
-    var2 = var2 + ((var1 * ((int32_t)dig_P5)) * 2);
-    var2 = (var2 / 4) + (((int32_t)dig_P4) * 65536);
-    var3 = (dig_P3 * (((var1 / 4) * (var1 / 4)) / 8192)) / 8;
-    var4 = (((int32_t)dig_P2) * var1) / 2;
-    var1 = (var3 + var4) / 262144;
-    var1 = (((32768 + var1)) * ((int32_t)dig_P1)) / 32768;
-		
-		// avoid exception caused by division by zero 
-    if (var1)
-    {
-        var5 = (uint32_t)((uint32_t)1048576) - Press_value;
-        P = ((uint32_t)(var5 - (uint32_t)(var2 / 4096))) * 3125;
-
-        if (P < 0x80000000)
-        {
-            P = (P << 1) / ((uint32_t)var1);
-        }
-        else
-        {
-            P = (P / (uint32_t)var1) * 2;
-        }
-
-        var1 = (((int32_t)dig_P9) * ((int32_t)(((P / 8) * (P / 8)) / 8192))) / 4096;
-        var2 = (((int32_t)(P / 4)) * ((int32_t)dig_P8)) / 8192;
-        P = (uint32_t)((int32_t)P + ((var1 + var2 + dig_P7) / 16));
-
-        if (P < pressure_min)
-        {
-            P = pressure_min;
-        }
-        else if (P > pressure_max)
-        {
-            P = pressure_max;
-        }
-    }
-    else
-    {
-        P = pressure_min;
-    }
-
-    return P;
-		*/
-		
-	// Wolf API L.344	
+	
 	#if (BME280_USE_INT64)	
 		int64_t v1,v2,p;
 
@@ -361,7 +295,7 @@ uint32_t BME280_compensate_P_int32(int32_t Press_value){
 	v1 = (((int64_t)dig_P9) * (p >> 13) * (p >> 13)) >> 25;
 	v2 = (((int64_t)dig_P8) * p) >> 19;
 	p = ((p + v1 + v2) >> 8) + ((int64_t)dig_P7 << 4);
-#else // BME280_USE_INT64
+#else 
 
 	int32_t v1,v2;
 	uint32_t p;
@@ -383,16 +317,16 @@ uint32_t BME280_compensate_P_int32(int32_t Press_value){
 	v2 = (((int32_t)(p >> 2)) * ((int32_t)dig_P8)) >> 13;
 	p = (uint32_t)((int32_t)p + ((v1 + v2 + dig_P7) >> 4));
 
-	// Convert pressure to Q24.8 format (fractional part always be .000)
+	
 	p <<= 8;
-#endif // BME280_USE_INT64
+#endif 
 
 	return (uint32_t)p/256;
 		
 		
 } 
 
-// Calcul Humidity compensated 24674867
+// Calcul Humidity compensated 
 
 
 uint32_t BME280_compensate_H(uint32_t humidity_value){
@@ -408,15 +342,14 @@ int8_t  dig_H3, dig_H6;
     int16_t dig_h5_lsb;
     int16_t dig_h5_msb;
 	
-	
-	//uint8_t  calib25_ADDR = 0xA1;
+
   uint8_t  calib26_ADDR = 0xE1;  // calib_H_Data[0]
   uint8_t  calib27_ADDR = 0xE2;  // calib_H_Data[1]
   uint8_t  calib28_ADDR = 0xE3;  // calib_H_Data[2]
   uint8_t  calib29_ADDR = 0xE4;  // calib_H_Data[3]
   uint8_t  calib30_ADDR = 0xE5;  // calib_H_Data[4]
   uint8_t  calib31_ADDR = 0xE6;  // calib_H_Data[5]
-	uint8_t  calib32_ADDR = 0xE7;  // calib_H_Data[6]
+  uint8_t  calib32_ADDR = 0xE7;  // calib_H_Data[6]
 
 // Read calibration data	
 
@@ -428,42 +361,20 @@ int8_t  dig_H3, dig_H6;
 	
 	
 
-uint8_t E5_LSB = calib_H_data[4]&0x0f;  // 0xE5 LSB
+uint8_t E5_LSB = calib_H_data[4]&0x0f;  // 0xE5 LSB  (MSB bit masking)
+uint8_t E5_MSB = calib_H_data[4];       // 0xE5 MSB
 
+         dig_H2 = (int16_t)(calib_H_data[1]<<8) |(int16_t) calib_H_data[0]; // 1 0
+	 dig_H3 =  calib_H_data[2]; 
+	 dig_H4 =  (calib_H_data[3] << 4) | (E5_LSB );	
+	 dig_H5 =  (calib_H_data[5] << 4) | (E5_MSB >> 4);
+	 dig_H6 =   (int8_t)calib_H_data[6];
 
-
-//uint8_t E5_MSB = calib_H_data[5];
-uint8_t E5_MSB = calib_H_data[4];  // 0xE5 MSB
-
-//dig_H1 =  calib_H_data[0];
- 
-  dig_H2 = (int16_t)(calib_H_data[1]<<8) |(int16_t) calib_H_data[0]; // 1 0
-
- 
-	dig_H3 =  calib_H_data[2]; 
-		
-	dig_H4 =  (calib_H_data[3] << 4) | (E5_LSB );	
-
-	dig_H5 =  (calib_H_data[5] << 4) | (E5_MSB >> 4);
-	
-	dig_H6 =   (int8_t)calib_H_data[6];
-	
-	/*  dig_h4_msb = (int16_t)(int8_t)calib_H_data[4] * 16;
-    dig_h4_lsb = (int16_t)(calib_H_data[5] & 0x0F);
-		
-		dig_H4 = dig_h4_msb | dig_h4_lsb;
-		
-		dig_h5_msb = (int16_t)(int8_t)calib_H_data[6] * 16;
-    dig_h5_lsb = (int16_t)(calib_H_data[6] >> 4);
-	
-	 dig_H5 = dig_h5_msb | dig_h5_lsb;
-   dig_H6 = (int8_t)reg_data[7];
-	*/
 	
 	HAL_Delay(200);
 	
 
-	int32_t var1;
+    int32_t var1;
     int32_t var2;
     int32_t var3;
     int32_t var4;
@@ -487,34 +398,5 @@ uint8_t E5_MSB = calib_H_data[4];  // 0xE5 MSB
     var5 = (var5 > 419430400 ? 419430400 : var5);
     humidity = (uint32_t)(var5 / 4096);
 
-   
-
     return humidity;
 }
-/*
- //----------LonelyWolf Driver-------------------------------------
-	int32_t vx1;
-
-	humidity  = t_fine - (int32_t)76800;
-	humidity  = ((((humidity_value << 14) - ((int32_t)dig_H4 << 20) - ((int32_t)dig_H5 * vx1)) +	(int32_t)16384) >> 15) *
-			(((((((humidity * (int32_t)dig_H6) >> 10) * (((humidity * (int32_t)dig_H3) >> 11) +
-			(int32_t)32768)) >> 10) + (int32_t)2097152) * ((int32_t)dig_H2) + 8192) >> 14);
-	humidity -= ((((humidity >> 15) * (humidity >> 15)) >> 7) * (int32_t)dig_H1) >> 4;
-	humidity  = (humidity < 0) ? 0 : humidity;
-	humidity  = (humidity > 419430400) ? 419430400 : humidity;
-
-	return (uint32_t)(humidity >> 12);
-	
-//---------------------------------------------------------------------	
-	
-}*/
-	
-	
-
-
-	 
-
-		
-	
-	
-//------------------ Pressure compensation Calculation : Bosch API L-1177 -------------------------------
