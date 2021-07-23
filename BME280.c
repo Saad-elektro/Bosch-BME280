@@ -7,9 +7,9 @@
 #include "printf.h"
 
 
-extern I2C_HandleTypeDef hi2c1;  // change your handler here accordingly
+extern I2C_HandleTypeDef hi2c1;  
 
-#define SLAVE_ADDRESS_LCD 0x76 // change this according to ur setup
+#define SLAVE_ADDRESS_LCD 0x76 
 
 void USART2_Init(void){
 	
