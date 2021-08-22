@@ -9,7 +9,7 @@
 
 extern I2C_HandleTypeDef hi2c1;  
 
-#define SLAVE_ADDRESS_LCD 0x76 
+#define SLAVE_ADDRESS_BME 0x76 
 
 void USART2_Init(void){
 	
@@ -19,7 +19,7 @@ void USART2_Init(void){
   GPIOA->CRH |= GPIO_CRH_CNF9_1;
   GPIOA->CRH |= (GPIO_CRH_MODE9_1 | GPIO_CRH_MODE9_0);
 	
-  USART1->BRR = 0XEA6;
+  USART1->BRR = 0XEA6; // USART Baud rate 
 
   USART1->CR1 |= USART_CR1_UE;
   USART1->CR1 |= USART_CR1_TE;
@@ -49,7 +49,7 @@ uint8_t Reg5_ADDR   = 0xF5;
 uint8_t Reg2_config = 0x01;
 uint8_t Reg4_config = 0x27;
 
-uint8_t Reg5_config = (0x11<<2|0>>7);
+uint8_t Reg5_config = (0x11<<2|0<<0);
 
 uint8_t Reg4_config_Value ;
 uint8_t Reg2_config_Value ;
